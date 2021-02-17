@@ -28,7 +28,8 @@ def search_object(obj: str, size: list, apikey: str):
         size = map(str, get_toponym_scale(toponym))
     response = requests.get(static_url, params={'ll': toponym_coords,
                                                 'l': 'map',
-                                                'spn': ','.join(size)})
+                                                'spn': ','.join(size),
+                                                'pt': '%s,pm2rdm' % toponym_coords})
     if response.status_code != 200:
         return static_error_msg
     Image.open(BytesIO(response.content)).show()
