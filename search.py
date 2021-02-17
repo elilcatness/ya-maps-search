@@ -1,9 +1,7 @@
 import argparse
 import requests
-from PIL import Image
 from io import BytesIO
-
-from length import lonlat_distance
+from PIL import Image
 
 
 def search_object(obj: str, size: list, geo_apikey: str, search_apikey: str):
@@ -39,22 +37,22 @@ def search_object(obj: str, size: list, geo_apikey: str, search_apikey: str):
     results = data['features']
     if not results:
         return pharmacy_error_msg
-    pharmacy = results[0]
-    pharmacy_coords = tuple(map(float, pharmacy['geometry']['coordinates']))
-    length = lonlat_distance(tuple(map(float, toponym_coords.split(','))),
-                             pharmacy_coords)
-    pharmacy_snippet = {'Название': pharmacy['properties']['name'],
-                        'Адрес': pharmacy['properties']['CompanyMetaData']['address'],
-                        'График работы': pharmacy['properties']['CompanyMetaData'].get(
-                            'Hours', {}).get('text', 'Не указан'),
-                        'Расстояние': ('%d м' % round(length) if length // 1000 < 1
-                                       else '%s км' % round(length / 1000, ndigits=2))}
-    print('\n'.join(['%s: %s' % (key, val) for key, val in pharmacy_snippet.items()]))
+    pharmacies = []
+    for ph in results:
+        ph_coords = ','.join(map(str, ph['geometry']['coordinates']))
+        metadata = ph['properties']['CompanyMetaData']
+        if 'Hours' not in metadata.keys():
+            color = 'gr'
+        elif metadata['Hours'].get('Availabilities'):
+            color = 'gn' if any(map(lambda x: x.get('TwentyFourHours', False),
+                                    metadata['Hours']['Availabilities'])) else 'bl'
+        else:
+            color = 'gr'
+        pharmacies.append('%s,pm2%sm' % (ph_coords, color))
 
     static_params = {'ll': toponym_coords,
                      'l': 'map',
-                     'pt': '~'.join(['%s,pm2gnm' % toponym_coords,
-                                     '%s,pm2rdm' % ','.join(map(str, pharmacy_coords))])}
+                     'pt': '~'.join(['%s,pm2rdm' % toponym_coords] + pharmacies)}
     if size:
         static_params['spn'] = ','.join(size)
     response = requests.get(static_url, params=static_params)
