@@ -4,6 +4,7 @@ import os
 import requests
 from PIL import Image
 from io import BytesIO
+from dotenv import load_dotenv
 
 from scale_selection import get_toponym_scale
 
@@ -38,6 +39,7 @@ def search_object(obj: str, size: list, apikey: str):
 
 
 if __name__ == '__main__':
+    load_dotenv()
     parser = argparse.ArgumentParser()
     parser.add_argument('obj', nargs='*', help='Object that is needed to be found on the map')
     parser.add_argument('--size', nargs=2, help='The size of the object in degrees')
