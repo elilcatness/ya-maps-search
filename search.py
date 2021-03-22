@@ -1,4 +1,6 @@
 import argparse
+import os
+
 import requests
 from PIL import Image
 from io import BytesIO
@@ -41,7 +43,6 @@ if __name__ == '__main__':
     parser.add_argument('--size', nargs=2, help='The size of the object in degrees')
     args = parser.parse_args()
 
-    callback = search_object(' '.join(args.obj), args.size,
-                             '40d1649f-0493-4b70-98ba-98533de7710b')
+    callback = search_object(' '.join(args.obj), args.size, os.getenv('GEOCODE_APIKEY'))
     if callback:
         print(callback)
